@@ -116,7 +116,7 @@ ggmap(sydney_map) +
   geom_sf(data = bus_position_table, aes(color = speed), inherit.aes = FALSE) +
   labs(title = "Realtime positions of buses in Sydney, Australia",
        color = "Speed (km/hr)",
-       subtitle = bus_response$date)
+       subtitle =  format(bus_response$date, tz = "Australia/Sydney"))
 ```
 
 <img src="man/figures/README-gtfsr-example-1.png" width="100%" />
