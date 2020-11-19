@@ -20,4 +20,7 @@ Imports:
     magrittr (>= 2.0.0),
     httr,
     checkmate,
-    jsonlite
+    jsonlite,
+    stringr,
+    cli,
+    glue
