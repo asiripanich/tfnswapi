@@ -23,4 +23,5 @@ Imports:
     jsonlite,
     stringr,
     cli,
-    glue
+    glue,
+    RProtoBuf
