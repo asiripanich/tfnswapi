@@ -25,7 +25,7 @@ You can install the `tfnswapi` package from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("tfnswapi")
+devtools::install_github("asiripanich/tfnswapi")
 ```
 
 ## Examples
