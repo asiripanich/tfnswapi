@@ -1,7 +1,7 @@
 Package: tfnswapi
 Type: Package
 Title: Access TfNSW Open Data from R
-Version: 0.1.0
+Version: 0.2.0
 Author: Amarin Siripanich
 Maintainer: Amarin Siripanich <amarin.siri@gmail.com>
 Description: Access TfNSW Open Data from R.
