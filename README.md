@@ -77,7 +77,8 @@ ggplot(data = tidied_carpark, aes(x = zone_id)) +
 ```
 
 <img src="man/figures/README-carpark-example-1.png" width="100%" />
-\#\#\# GTFS Realtime API
+
+### GTFS Realtime API
 
 See TfNSW GTFS Realtime documentation
 [here](https://opendata.transport.nsw.gov.au/sites/default/files/TfNSW_GTFS_Realtime_Buses_Technical_Doc.pdf).
