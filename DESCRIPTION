@@ -8,6 +8,8 @@ Description: Access TfNSW Open Data from R.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/asiripanich/tfnswapi
+BugReports: https://github.com/asiripanich/tfnswapi/issues
 Suggests: 
     covr,
     testthat
