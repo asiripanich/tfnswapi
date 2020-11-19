@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tfnswapi</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -120,7 +120,9 @@
     <p>Get data using GET API.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tfnswapi_get</span><span class='op'>(</span><span class='va'>api</span>, params <span class='op'>=</span> <span class='cn'>NULL</span>, key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>tfnswapi_get</span><span class='op'>(</span><span class='va'>api</span>, params <span class='op'>=</span> <span class='cn'>NULL</span>, key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='fu'>tfnswapi_get_response</span><span class='op'>(</span><span class='va'>path</span>, params <span class='op'>=</span> <span class='cn'>NULL</span>, key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -140,11 +142,15 @@ here.</p></td>
       <td><p>Character (optional). An API key can be provided, else if emptied
 it will look for any previously registered API key.</p></td>
     </tr>
+    <tr>
+      <th>path</th>
+      <td><p>Character.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a response list</p>
+    <p>a response with parsed content.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
