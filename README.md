@@ -62,17 +62,21 @@ carpark = tfnswapi_get("carpark", params = list(facility = 2))
 tidied_carpark = data.frame(
   zone_id = purrr::map_chr(carpark$content$zones, purrr::pluck("zone_id")),
   total_spots = purrr::map_chr(carpark$content$zones, purrr::pluck("spots")),
-  free_spots = purrr::map_chr(carpark$content$zones, purrr::pluck(list("occupancy", "total")))
+  occupied_spots = purrr::map_chr(carpark$content$zones, purrr::pluck(list("occupancy", "total")))
 )
 
 library(ggplot2)
 ggplot(data = tidied_carpark, aes(x = zone_id)) +
-  geom_col(aes(y = as.integer(total_spots)), fill = "grey60", alpha = 0.8) +
-  geom_col(aes(y = as.integer(free_spots)), fill = "#009E73") +
+  geom_col(aes(y = as.integer(total_spots), fill = "Capacity"), alpha = 0.7) +
+  geom_col(aes(y = as.integer(occupied_spots), fill = "Occupied")) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Occupied" = "#DA7800", "Capacity" = "grey60")) +
+  theme(legend.position = "bottom") +
   labs(
     title = paste("Available parking spots at", carpark$content$facility_name),
     subtitle = carpark$content$MessageDate,
-    y = "# Spots"
+    y = "# Spots",
+    fill = ""
   )
 ```
 
