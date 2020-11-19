@@ -9,6 +9,9 @@ tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
 #'  here.
 #' @param key Character (optional). An API key can be provided, else if emptied
 #'  it will look for any previously registered API key.
+#' @param descriptor This field is only used if the response is of type
+#'  `application/x-google-protobuf`. You must select one of `transit_realtime` variables.
+#'  By default this is `transit_realtime.FeedMessage`.
 #'
 #' @return a response with parsed content.
 #' @export
@@ -22,18 +25,21 @@ tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
 #'  tfnswapi_get("carpark", params = list(facility = 2))
 #'
 #' }
-tfnswapi_get = function(api, params = NULL, key = tfnswapi_get_api_key()) {
+tfnswapi_get = function(api,
+                        params = NULL,
+                        key = tfnswapi_get_api_key(),
+                        descriptor = transit_realtime.FeedMessage) {
 
-  checkmate::assert_string(api)
-
-  path = glue::glue("v1/{api}")
+  path = construct_path(api)
 
   response = tfnswapi_get_response(path, params, key)
 
-  response$content = switch(httr::http_type(response),
-                  "application/json" = parse_json_response(response),
-                  "application/x-google-protobuf" = parse_ggprotobuf_response(response),
-                  stop("Don't know how to parse ", httr::http_type(response)))
+  response$content = switch(
+    httr::http_type(response),
+    "application/json" = parse_json_response(response),
+    "application/x-google-protobuf" = parse_ggprotobuf_response(response, descriptor),
+    stop("Don't know how to parse ", httr::http_type(response))
+  )
 
   if (httr::status_code(response) != 200) {
     stop(
@@ -74,9 +80,13 @@ parse_json_response = function(response) {
   jsonlite::fromJSON(httr::content(response, "text"), simplifyVector = FALSE)
 }
 
-parse_ggprotobuf_response = function(response) {
-  FeedMessage = RProtoBuf::read(descriptor = transit_realtime.FeedMessage,
-                                input = response$content)
+parse_ggprotobuf_response = function(response, descriptor = transit_realtime.FeedMessage) {
+  FeedMessage = RProtoBuf::read(descriptor = descriptor, input = response$content)
   json = RProtoBuf::toJSON(FeedMessage)
   lst = jsonlite::fromJSON(json)
+}
+
+construct_path = function(api) {
+  checkmate::assert_string(api)
+  glue::glue("v1/{api}")
 }
