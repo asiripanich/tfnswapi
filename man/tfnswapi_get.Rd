@@ -5,7 +5,12 @@
 \alias{tfnswapi_get_response}
 \title{Get data using GET API.}
 \usage{
-tfnswapi_get(api, params = NULL, key = tfnswapi_get_api_key())
+tfnswapi_get(
+  api,
+  params = NULL,
+  key = tfnswapi_get_api_key(),
+  descriptor = transit_realtime.FeedMessage
+)
 
 tfnswapi_get_response(path, params = NULL, key = tfnswapi_get_api_key())
 }
@@ -18,6 +23,10 @@ here.}
 
 \item{key}{Character (optional). An API key can be provided, else if emptied
 it will look for any previously registered API key.}
+
+\item{descriptor}{This field is only used if the response is of type
+\code{application/x-google-protobuf}. You must select one of \code{transit_realtime} variables.
+By default this is \code{transit_realtime.FeedMessage}.}
 
 \item{path}{Character.}
 }
