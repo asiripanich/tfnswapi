@@ -174,7 +174,7 @@
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">bus_position_table</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">speed</span><span class="op">)</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Realtime positions of buses in Sydney, Australia"</span>,
        color <span class="op">=</span> <span class="st">"Speed (km/hr)"</span>,
-       subtitle <span class="op">=</span> <span class="va">bus_response</span><span class="op">$</span><span class="va">date</span><span class="op">)</span></code></pre></div>
+       subtitle <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span><span class="op">(</span><span class="va">bus_response</span><span class="op">$</span><span class="va">date</span>, tz <span class="op">=</span> <span class="st">"Australia/Sydney"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-gtfsr-example-1.png" width="100%"></p>
 </div>
 </div>
