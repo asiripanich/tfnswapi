@@ -5,8 +5,6 @@
 
 <!-- badges: start -->
 
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![R build
 status](https://github.com/asiripanich/tfnswapi/workflows/R-CMD-check/badge.svg)](https://github.com/asiripanich/tfnswapi/actions)
 <!-- badges: end -->
@@ -29,7 +27,9 @@ You can install the `tfnswapi` package from
 install.packages("tfnswapi")
 ```
 
-## Example
+## Examples
+
+### Carpark API
 
 ``` r
 library(tfnswapi)
@@ -76,4 +76,46 @@ ggplot(data = tidied_carpark, aes(x = zone_id)) +
   )
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-carpark-example-1.png" width="100%" />
+\#\#\# GTFS Realtime API
+
+See TfNSW GTFS Realtime documentation
+[here](https://opendata.transport.nsw.gov.au/sites/default/files/TfNSW_GTFS_Realtime_Buses_Technical_Doc.pdf).
+
+``` r
+library(tfnswapi)
+library(ggplot2)
+library(ggmap)
+library(sf)
+
+# remove `if (FALSE)` to register your own API key
+if (FALSE) {
+  tfnswapi_register("<your-api-key>")
+}
+
+bus_response = tfnswapi_get("gtfs/vehiclepos/buses")
+bus_position_table = bus_response$content$entity$vehicle$position
+
+bus_position_table = 
+  bus_position_table %>%
+  sf::st_as_sf(coords = c("longitude", "latitude")) %>%
+  sf::st_set_crs(value = sf::st_crs("WGS84"))
+
+# Convert momentary speed measured by the vehicle in meters per second to
+# kilometers per hour
+bus_position_table$speed = 3.6 * bus_position_table$speed
+
+# get base map
+sydney_bbox = sf::st_geometry(bus_position_table) %>% sf::st_bbox()
+names(sydney_bbox) <- c("left", "bottom", "right", "top")
+sydney_map = get_stamenmap(sydney_bbox, maptype = "toner-lite", messaging = FALSE)
+
+ggmap(sydney_map) +
+  coord_sf(crs = sf::st_crs("WGS84")) +
+  geom_sf(data = bus_position_table, aes(color = speed), inherit.aes = FALSE) +
+  labs(title = "Realtime positions of buses in Sydney, Australia",
+       color = "Speed (km/hr)",
+       subtitle = bus_response$date)
+```
+
+<img src="man/figures/README-gtfsr-example-1.png" width="100%" />
