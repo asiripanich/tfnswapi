@@ -10,7 +10,7 @@ tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
 #' @param key Character (optional). An API key can be provided, else if emptied
 #'  it will look for any previously registered API key.
 #'
-#' @return a response list
+#' @return a response with parsed content.
 #' @export
 #'
 #' @examples
@@ -25,27 +25,21 @@ tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
 tfnswapi_get = function(api, params = NULL, key = tfnswapi_get_api_key()) {
 
   checkmate::assert_string(api)
-  checkmate::assert_list(params, names = "unique", any.missing = FALSE, null.ok = TRUE)
 
-  path = c("v1", api)
-  url = httr::modify_url(tfnsw_base_api_url, path = path, query = params)
+  path = glue::glue("v1/{api}")
 
-  headers = httr::add_headers("Authorization" = paste0("apikey ", key),
-                              "Accept" = "application/json")
+  response = tfnswapi_get_response(path, params, key)
 
-  resp <- httr::GET(url, ua, headers)
+  response$content = switch(httr::http_type(response),
+                  "application/json" = parse_json_response(response),
+                  "application/x-google-protobuf" = parse_ggprotobuf_response(response),
+                  stop("Don't know how to parse ", httr::http_type(response)))
 
-  if (httr::http_type(resp) != "application/json") {
-    stop("API did not return json", call. = FALSE)
-  }
-
-  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
-
-  if (httr::status_code(resp) != 200) {
+  if (httr::status_code(response) != 200) {
     stop(
       sprintf(
         "TfNSW API request failed [%s]\n%s\n<%s>\n<%s>",
-        httr::status_code(resp),
+        httr::status_code(response),
         parsed$ErrorDetails$Message,
         parsed$ErrorDetails$RequestMethod,
         parsed$ErrorDetails$RequestedUrl
@@ -55,12 +49,34 @@ tfnswapi_get = function(api, params = NULL, key = tfnswapi_get_api_key()) {
   }
 
   structure(
-    list(
-      content = parsed,
-      path = path,
-      response = resp
-    ),
+    response,
     class = "tfnswapi"
   )
 }
 
+#' @param path Character.
+#' @rdname tfnswapi_get
+#' @export
+tfnswapi_get_response = function(path, params = NULL, key = tfnswapi_get_api_key()) {
+
+  checkmate::assert_string(path)
+  checkmate::assert_list(params, names = "unique", any.missing = FALSE, null.ok = TRUE)
+
+  url = httr::modify_url(tfnsw_base_api_url, path = path, query = params)
+
+  headers = httr::add_headers("Authorization" = paste0("apikey ", key))
+
+  # return response
+  httr::GET(url, ua, headers)
+}
+
+parse_json_response = function(response) {
+  jsonlite::fromJSON(httr::content(response, "text"), simplifyVector = FALSE)
+}
+
+parse_ggprotobuf_response = function(response) {
+  FeedMessage = RProtoBuf::read(descriptor = transit_realtime.FeedMessage,
+                                input = response$content)
+  json = RProtoBuf::toJSON(FeedMessage)
+  lst = jsonlite::fromJSON(json)
+}

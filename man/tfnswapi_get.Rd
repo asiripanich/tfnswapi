@@ -2,9 +2,12 @@
 % Please edit documentation in R/get.R
 \name{tfnswapi_get}
 \alias{tfnswapi_get}
+\alias{tfnswapi_get_response}
 \title{Get data using GET API.}
 \usage{
 tfnswapi_get(api, params = NULL, key = tfnswapi_get_api_key())
+
+tfnswapi_get_response(path, params = NULL, key = tfnswapi_get_api_key())
 }
 \arguments{
 \item{api}{Character. API name (e.g. 'carpark' for
@@ -15,9 +18,11 @@ here.}
 
 \item{key}{Character (optional). An API key can be provided, else if emptied
 it will look for any previously registered API key.}
+
+\item{path}{Character.}
 }
 \value{
-a response list
+a response with parsed content.
 }
 \description{
 Get data using GET API.
