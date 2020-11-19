@@ -61,12 +61,16 @@ tidied_carpark = data.frame(
 
 library(ggplot2)
 ggplot(data = tidied_carpark, aes(x = zone_id)) +
-  geom_col(aes(y = as.integer(total_spots)), fill = "grey60", alpha = 0.8) +
-  geom_col(aes(y = as.integer(free_spots)), fill = "#009E73") +
+  geom_col(aes(y = as.integer(total_spots), fill = "Capacity"), alpha = 0.7) +
+  geom_col(aes(y = as.integer(free_spots), fill = "Occupied")) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Occupied" = "#DA7800", "Capacity" = "grey60")) +
+  theme(legend.position = "bottom") +
   labs(
     title = paste("Available parking spots at", carpark$content$facility_name),
     subtitle = carpark$content$MessageDate,
-    y = "# Spots"
+    y = "# Spots",
+    fill = ""
   )
 ```
 
