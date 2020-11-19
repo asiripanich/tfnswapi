@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tfnswapi</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
       </span>
     </div>
 
@@ -120,7 +120,12 @@
     <p>Get data using GET API.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tfnswapi_get</span><span class='op'>(</span><span class='va'>api</span>, params <span class='op'>=</span> <span class='cn'>NULL</span>, key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>tfnswapi_get</span><span class='op'>(</span>
+  <span class='va'>api</span>,
+  params <span class='op'>=</span> <span class='cn'>NULL</span>,
+  key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span>,
+  descriptor <span class='op'>=</span> <span class='va'>transit_realtime.FeedMessage</span>
+<span class='op'>)</span>
 
 <span class='fu'>tfnswapi_get_response</span><span class='op'>(</span><span class='va'>path</span>, params <span class='op'>=</span> <span class='cn'>NULL</span>, key <span class='op'>=</span> <span class='fu'><a href='tfnswapi_get_api_key.html'>tfnswapi_get_api_key</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
 
@@ -141,6 +146,12 @@ here.</p></td>
       <th>key</th>
       <td><p>Character (optional). An API key can be provided, else if emptied
 it will look for any previously registered API key.</p></td>
+    </tr>
+    <tr>
+      <th>descriptor</th>
+      <td><p>This field is only used if the response is of type
+<code>application/x-google-protobuf</code>. You must select one of <code>transit_realtime</code> variables.
+By default this is <code>transit_realtime.FeedMessage</code>.</p></td>
     </tr>
     <tr>
       <th>path</th>

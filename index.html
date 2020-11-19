@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">tfnswapi</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
       </span>
     </div>
 
@@ -86,9 +86,12 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"tfnswapi"</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="example" class="section level2">
+<div id="examples" class="section level2">
 <h2 class="hasAnchor">
-<a href="#example" class="anchor"></a>Example</h2>
+<a href="#examples" class="anchor"></a>Examples</h2>
+<div id="carpark-api" class="section level3">
+<h3 class="hasAnchor">
+<a href="#carpark-api" class="anchor"></a>Carpark API</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/asiripanich/tfnswapi">tfnswapi</a></span><span class="op">)</span>
 <span class="co"># See what facilities are available</span>
@@ -132,7 +135,44 @@
     subtitle <span class="op">=</span> <span class="va">carpark</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">MessageDate</span>,
     y <span class="op">=</span> <span class="st">"# Spots"</span>
   <span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-example-1.png" width="100%"></p>
+<p><img src="reference/figures/README-carpark-example-1.png" width="100%"> ### GTFS Realtime API</p>
+<p>See TfNSW GTFS Realtime documentation <a href="https://opendata.transport.nsw.gov.au/sites/default/files/TfNSW_GTFS_Realtime_Buses_Technical_Doc.pdf">here</a>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/asiripanich/tfnswapi">tfnswapi</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggmap</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
+
+<span class="co"># remove `if (FALSE)` to register your own API key</span>
+<span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span>
+  <span class="fu"><a href="reference/tfnswapi_register.html">tfnswapi_register</a></span><span class="op">(</span><span class="st">"&lt;your-api-key&gt;"</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="va">bus_response</span> <span class="op">=</span> <span class="fu"><a href="reference/tfnswapi_get.html">tfnswapi_get</a></span><span class="op">(</span><span class="st">"gtfs/vehiclepos/buses"</span><span class="op">)</span>
+<span class="va">bus_position_table</span> <span class="op">=</span> <span class="va">bus_response</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">entity</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">position</span>
+
+<span class="va">bus_position_table</span> <span class="op">=</span> 
+  <span class="va">bus_position_table</span> <span class="op">%&gt;%</span>
+  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"longitude"</span>, <span class="st">"latitude"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span>value <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"WGS84"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># Convert momentary speed measured by the vehicle in meters per second to</span>
+<span class="co"># kilometers per hour</span>
+<span class="va">bus_position_table</span><span class="op">$</span><span class="va">speed</span> <span class="op">=</span> <span class="fl">3.6</span> <span class="op">*</span> <span class="va">bus_position_table</span><span class="op">$</span><span class="va">speed</span>
+
+<span class="co"># get base map</span>
+<span class="va">sydney_bbox</span> <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">bus_position_table</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">sydney_bbox</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span>, <span class="st">"right"</span>, <span class="st">"top"</span><span class="op">)</span>
+<span class="va">sydney_map</span> <span class="op">=</span> <span class="fu">get_stamenmap</span><span class="op">(</span><span class="va">sydney_bbox</span>, maptype <span class="op">=</span> <span class="st">"toner-lite"</span>, messaging <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+
+<span class="fu">ggmap</span><span class="op">(</span><span class="va">sydney_map</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">coord_sf</span><span class="op">(</span>crs <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"WGS84"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">bus_position_table</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">speed</span><span class="op">)</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Realtime positions of buses in Sydney, Australia"</span>,
+       color <span class="op">=</span> <span class="st">"Speed (km/hr)"</span>,
+       subtitle <span class="op">=</span> <span class="va">bus_response</span><span class="op">$</span><span class="va">date</span><span class="op">)</span></code></pre></div>
+<p><img src="reference/figures/README-gtfsr-example-1.png" width="100%"></p>
+</div>
 </div>
 </div>
   </div>
@@ -164,7 +204,6 @@
   <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://github.com/asiripanich/tfnswapi/actions"><img src="https://github.com/asiripanich/tfnswapi/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
 </ul>
 </div>
