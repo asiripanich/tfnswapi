@@ -24,7 +24,8 @@ You can install the `tfnswapi` package from
 [GitHub](https://github.com/asiripanich/tfnswapi) with:
 
 ``` r
-install.packages("tfnswapi")
+# install.packages("devtools")
+devtools::install_github("tfnswapi")
 ```
 
 ## Examples
