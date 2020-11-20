@@ -129,7 +129,7 @@
 
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span>
 <span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">tidied_carpark</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">zone_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_col</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">total_spots</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"Capacity"</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_col</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">total_spots</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"Capacity"</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_col</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">occupied_spots</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"Occupied"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_fill_manual</span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Occupied"</span> <span class="op">=</span> <span class="st">"#DA7800"</span>, <span class="st">"Capacity"</span> <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -150,6 +150,7 @@
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/asiripanich/tfnswapi">tfnswapi</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggmap</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">data.table</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
 
 <span class="co"># remove `if (FALSE)` to register your own API key</span>
@@ -158,10 +159,11 @@
 <span class="op">}</span>
 
 <span class="va">bus_response</span> <span class="op">=</span> <span class="fu"><a href="reference/tfnswapi_get.html">tfnswapi_get</a></span><span class="op">(</span><span class="st">"gtfs/vehiclepos/buses"</span><span class="op">)</span>
-<span class="va">bus_position_table</span> <span class="op">=</span> <span class="va">bus_response</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">entity</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">position</span>
+<span class="va">bus_position_table</span> <span class="op">=</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu">as.data.table</span><span class="op">(</span><span class="va">bus_response</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">entity</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">position</span><span class="op">)</span>
 
 <span class="va">bus_position_table</span> <span class="op">=</span> 
   <span class="va">bus_position_table</span> <span class="op">%&gt;%</span>
+  <span class="va">.</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">longitude</span><span class="op">)</span>, <span class="op">]</span> <span class="op">%&gt;%</span>
   <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"longitude"</span>, <span class="st">"latitude"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span>value <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"WGS84"</span><span class="op">)</span><span class="op">)</span>
 
@@ -176,11 +178,67 @@
 
 <span class="fu">ggmap</span><span class="op">(</span><span class="va">sydney_map</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>crs <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"WGS84"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">bus_position_table</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">speed</span><span class="op">)</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">bus_position_table</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">speed</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.3</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Realtime positions of buses in Sydney, Australia"</span>,
        color <span class="op">=</span> <span class="st">"Speed (km/hr)"</span>,
        subtitle <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/format.html">format</a></span><span class="op">(</span><span class="va">bus_response</span><span class="op">$</span><span class="va">date</span>, tz <span class="op">=</span> <span class="st">"Australia/Sydney"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-gtfsr-example-1.png" width="100%"></p>
+</div>
+<div id="animate-gtfs-realtime-data" class="section level3">
+<h3 class="hasAnchor">
+<a href="#animate-gtfs-realtime-data" class="anchor"></a>Animate GTFS Realtime data</h3>
+<p>Animate GTFS Realtime data with <a href="https://symbolixau.github.io/mapdeck/index.html">mapdeck</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/asiripanich/tfnswapi">tfnswapi</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">data.table</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">mapdeck</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">sfheaders</span><span class="op">)</span>
+
+<span class="co"># remove `if (FALSE)` to register your own API key</span>
+<span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span>
+  <span class="fu"><a href="reference/tfnswapi_register.html">tfnswapi_register</a></span><span class="op">(</span><span class="st">"&lt;your-api-key&gt;"</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="co"># query GTFS realtime 20 times, 5 seconds between each request.</span>
+<span class="va">n</span> <span class="op">=</span> <span class="fl">30</span>
+<span class="va">bus_responses</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>
+  <span class="fu"><a href="reference/tfnswapi_get.html">tfnswapi_get</a></span><span class="op">(</span><span class="st">"gtfs/vehiclepos/buses"</span><span class="op">)</span>
+<span class="op">}</span><span class="op">)</span> 
+
+<span class="co"># tidy the vehicle position data</span>
+<span class="va">bus_position_tables</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">.data</span> <span class="op">=</span> <span class="va">bus_responses</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">entity</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">position</span>
+  <span class="va">.data</span><span class="op">[[</span><span class="st">"vehicle_id"</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">bus_responses</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">content</span><span class="op">$</span><span class="va">entity</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">vehicle</span><span class="op">$</span><span class="va">id</span>
+  <span class="va">.data</span><span class="op">[[</span><span class="st">'timestep'</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">x</span>
+  <span class="va">.data</span>
+<span class="op">}</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu">rbindlist</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">data.table</span><span class="fu">::</span><span class="fu">setorder</span><span class="op">(</span><span class="va">vehicle_id</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="va">.</span><span class="op">[</span>, <span class="va">elev</span> <span class="op">:=</span> <span class="fl">0</span><span class="op">]</span> <span class="op">%&gt;%</span>
+  <span class="va">.</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">latitude</span><span class="op">)</span><span class="op">]</span>
+
+<span class="co"># convert it into sf</span>
+<span class="va">bus_position_sfc</span> <span class="op">=</span> <span class="fu">sfheaders</span><span class="fu">::</span><span class="fu">sfc_linestring</span><span class="op">(</span>
+    obj <span class="op">=</span> <span class="va">bus_position_tables</span>
+    , x <span class="op">=</span> <span class="st">"longitude"</span>
+    , y <span class="op">=</span> <span class="st">"latitude"</span>
+    , z <span class="op">=</span> <span class="st">"elev"</span>
+    , m <span class="op">=</span> <span class="st">"timestep"</span>
+    , linestring_id <span class="op">=</span> <span class="st">"vehicle_id"</span>
+<span class="op">)</span>
+
+<span class="va">bus_position_sf</span> <span class="op">=</span> 
+  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">bus_position_tables</span><span class="op">[</span><span class="va">bus_position_tables</span><span class="op">[</span>, <span class="va">.I</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, by <span class="op">=</span> <span class="va">vehicle_id</span><span class="op">]</span><span class="op">$</span><span class="va">V1</span>, 
+               <span class="fu">.</span><span class="op">(</span><span class="va">vehicle_id</span>, <span class="va">bearing</span>, <span class="va">speed</span><span class="op">)</span><span class="op">]</span>,
+                               <span class="va">bus_position_sfc</span><span class="op">)</span>
+  
+<span class="co"># visualise</span>
+<span class="fu">mapdeck</span><span class="op">(</span>style <span class="op">=</span> <span class="fu">mapdeck_style</span><span class="op">(</span><span class="st">"dark"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">add_trips</span><span class="op">(</span>data <span class="op">=</span> <span class="va">bus_position_sf</span>,
+            stroke_colour <span class="op">=</span> <span class="st">"vehicle_id"</span>,
+            animation_speed <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
+<p><img src="reference/figures/animated-gtfsr-sydney.gif"></p>
 </div>
 </div>
 </div>
