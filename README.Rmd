@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  cache = T
 )
 ```
 
@@ -83,6 +84,7 @@ See TfNSW GTFS Realtime documentation [here](https://opendata.transport.nsw.gov.
 library(tfnswapi)
 library(ggplot2)
 library(ggmap)
+library(data.table)
 library(sf)
 
 # remove `if (FALSE)` to register your own API key
@@ -91,10 +93,11 @@ if (FALSE) {
 }
 
 bus_response = tfnswapi_get("gtfs/vehiclepos/buses")
-bus_position_table = bus_response$content$entity$vehicle$position
+bus_position_table = data.table::as.data.table(bus_response$content$entity$vehicle$position)
 
 bus_position_table = 
   bus_position_table %>%
+  .[!is.na(longitude), ] %>%
   sf::st_as_sf(coords = c("longitude", "latitude")) %>%
   sf::st_set_crs(value = sf::st_crs("WGS84"))
 
@@ -109,9 +112,66 @@ sydney_map = get_stamenmap(sydney_bbox, maptype = "toner-lite", messaging = FALS
 
 ggmap(sydney_map) +
   coord_sf(crs = sf::st_crs("WGS84")) +
-  geom_sf(data = bus_position_table, aes(color = speed), inherit.aes = FALSE) +
+  geom_sf(data = bus_position_table, aes(color = speed), alpha = 0.3, inherit.aes = FALSE) +
   labs(title = "Realtime positions of buses in Sydney, Australia",
        color = "Speed (km/hr)",
        subtitle =  format(bus_response$date, tz = "Australia/Sydney"))
 ```
 
+### Animate GTFS Realtime data
+
+Animate GTFS Realtime data with [mapdeck](https://symbolixau.github.io/mapdeck/index.html).
+
+``` r
+library(tfnswapi)
+library(data.table)
+library(sf)
+library(mapdeck)
+library(sfheaders)
+
+# remove `if (FALSE)` to register your own API key
+if (FALSE) {
+  tfnswapi_register("<your-api-key>")
+}
+
+# query GTFS realtime 20 times, 5 seconds between each request.
+n = 30
+bus_responses = lapply(1:n, function(x) {
+  Sys.sleep(5)
+  tfnswapi_get("gtfs/vehiclepos/buses")
+}) 
+
+# tidy the vehicle position data
+bus_position_tables = lapply(1:n, function(x) {
+  .data = bus_responses[[x]]$content$entity$vehicle$position
+  .data[["vehicle_id"]] = bus_responses[[x]]$content$entity$vehicle$vehicle$id
+  .data[['timestep']] = x
+  .data
+}) %>% data.table::rbindlist() %>%
+  data.table::setorder(vehicle_id) %>%
+  .[, elev := 0] %>%
+  .[!is.na(latitude)]
+
+# convert it into sf
+bus_position_sfc = sfheaders::sfc_linestring(
+    obj = bus_position_tables
+    , x = "longitude"
+    , y = "latitude"
+    , z = "elev"
+    , m = "timestep"
+    , linestring_id = "vehicle_id"
+)
+
+bus_position_sf = 
+  sf::st_as_sf(bus_position_tables[bus_position_tables[, .I[1], by = vehicle_id]$V1, 
+               .(vehicle_id, bearing, speed)],
+                               bus_position_sfc)
+  
+# visualise
+mapdeck(style = mapdeck_style("dark")) %>%
+  add_trips(data = bus_position_sf,
+            stroke_colour = "vehicle_id",
+            animation_speed = 10)
+```
+
+![](man/figures/animated-gtfsr-sydney.gif)
