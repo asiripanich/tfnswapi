@@ -1,5 +1,5 @@
 ua <- httr::user_agent("http://github.com/asiripanich/tfnswapi")
-tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
+tfnsw_base_api_url <- "https://api.transport.nsw.gov.au/"
 
 #' Get data using GET API.
 #'
@@ -17,25 +17,21 @@ tfnsw_base_api_url = "https://api.transport.nsw.gov.au/"
 #' @export
 #'
 #' @examples
-#'
 #' \dontrun{
 #'
-#'  # See what facilities are available
-#'  tfnswapi_get("carpark")
-#'  tfnswapi_get("carpark", params = list(facility = 2))
-#'
+#' # See what facilities are available
+#' tfnswapi_get("carpark")
+#' tfnswapi_get("carpark", params = list(facility = 2))
 #' }
-tfnswapi_get = function(api,
-                        params = NULL,
-                        key = tfnswapi_get_api_key(),
-                        descriptor = transit_realtime.FeedMessage) {
+tfnswapi_get <- function(api,
+                         params = NULL,
+                         key = tfnswapi_get_api_key(),
+                         descriptor = transit_realtime.FeedMessage) {
+  path <- construct_path(api)
 
-  path = construct_path(api)
+  response <- tfnswapi_get_response(path, params, key)
 
-  response = tfnswapi_get_response(path, params, key)
-
-  response$content = switch(
-    httr::http_type(response),
+  response$content <- switch(httr::http_type(response),
     "application/json" = parse_json_response(response),
     "application/x-google-protobuf" = parse_ggprotobuf_response(response, descriptor),
     stop("Don't know how to parse ", httr::http_type(response))
@@ -63,30 +59,29 @@ tfnswapi_get = function(api,
 #' @param path Character.
 #' @rdname tfnswapi_get
 #' @export
-tfnswapi_get_response = function(path, params = NULL, key = tfnswapi_get_api_key()) {
-
+tfnswapi_get_response <- function(path, params = NULL, key = tfnswapi_get_api_key()) {
   checkmate::assert_string(path)
   checkmate::assert_list(params, names = "unique", any.missing = FALSE, null.ok = TRUE)
 
-  url = httr::modify_url(tfnsw_base_api_url, path = path, query = params)
+  url <- httr::modify_url(tfnsw_base_api_url, path = path, query = params)
 
-  headers = httr::add_headers("Authorization" = paste0("apikey ", key))
+  headers <- httr::add_headers("Authorization" = paste0("apikey ", key))
 
   # return response
   httr::GET(url, ua, headers)
 }
 
-parse_json_response = function(response) {
+parse_json_response <- function(response) {
   jsonlite::fromJSON(httr::content(response, "text"), simplifyVector = FALSE)
 }
 
-parse_ggprotobuf_response = function(response, descriptor = transit_realtime.FeedMessage) {
-  FeedMessage = RProtoBuf::read(descriptor = descriptor, input = response$content)
-  json = RProtoBuf::toJSON(FeedMessage)
-  lst = jsonlite::fromJSON(json)
+parse_ggprotobuf_response <- function(response, descriptor = transit_realtime.FeedMessage) {
+  FeedMessage <- RProtoBuf::read(descriptor = descriptor, input = response$content)
+  json <- RProtoBuf::toJSON(FeedMessage)
+  lst <- jsonlite::fromJSON(json)
 }
 
-construct_path = function(api) {
+construct_path <- function(api) {
   checkmate::assert_string(api)
   glue::glue("v1/{api}")
 }

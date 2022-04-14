@@ -6,7 +6,7 @@
 #' @examples
 #'
 #' tfnswapi_has_api_key()
-tfnswapi_has_api_key = function() {
+tfnswapi_has_api_key <- function() {
   has_api_key()
 }
 
@@ -18,14 +18,14 @@ tfnswapi_has_api_key = function() {
 #' @examples
 #'
 #' tfnswapi_get_api_key()
-tfnswapi_get_api_key = function() {
+tfnswapi_get_api_key <- function() {
   get_api_key()
 }
 
-has_api_key = function() {
-  checkmate::assert_flag(get_api_key() != '')
+has_api_key <- function() {
+  checkmate::assert_flag(get_api_key() != "")
 }
 
-get_api_key = function() {
+get_api_key <- function() {
   Sys.getenv("TFNSW_API_KEY")
 }
